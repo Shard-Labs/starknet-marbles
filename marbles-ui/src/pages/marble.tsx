@@ -4,6 +4,7 @@ import { View } from '~/render/marble'
 import { Texture } from '~/components/Texture'
 
 const Marble: NextPage = () => {
+    const hashNumber = 5
     const [textureUri, setTextureUri] = React.useState<string | null>(null)
     const [marbleCanvas, setMarbleCanvas] =
         React.useState<HTMLCanvasElement | null>(null)
@@ -37,8 +38,12 @@ const Marble: NextPage = () => {
 
     return (
         <div>
-            <Texture onTextureRender={handleTextureRender} />
-            <canvas ref={viewRef} />
+            <Texture
+                key={hashNumber}
+                hashNumber={hashNumber}
+                onTextureRender={handleTextureRender}
+            />
+            <canvas key={hashNumber} ref={viewRef} />
         </div>
     )
 }

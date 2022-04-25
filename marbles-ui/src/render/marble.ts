@@ -7,16 +7,11 @@ class Marble {
 
     private constructor(
         private _radius: number,
-        private _widthSegments: number,
-        private _heightSegments: number,
+
         private _opacity: number,
         private _texture: THREE.Texture
     ) {
-        this._geometry = new THREE.SphereBufferGeometry(
-            this._radius,
-            this._widthSegments,
-            this._heightSegments
-        )
+        this._geometry = new THREE.IcosahedronGeometry(this._radius, 15)
         this._material = new THREE.MeshBasicMaterial({
             transparent: true,
             opacity: this._opacity,
@@ -30,15 +25,13 @@ class Marble {
 
     static create(
         radius: number,
-        widthSegments: number,
-        heightSegments: number,
+
         opacity: number,
         texture: THREE.Texture
     ): Marble {
         return new Marble(
             radius,
-            widthSegments,
-            heightSegments,
+
             opacity,
             texture
         )
@@ -51,12 +44,16 @@ class Marble {
 
 async function getTexture(uri: string) {
     // load texture from url
-    return await new THREE.TextureLoader().loadAsync(uri)
+    const texture = await new THREE.TextureLoader().loadAsync(uri)
+
+    texture.mapping = THREE.EquirectangularReflectionMapping
+
+    return texture
 }
 
 async function renderMarble(textureUri: string) {
     const texture = await getTexture(textureUri)
-    const marble = Marble.create(1, 32, 32, 1, texture)
+    const marble = Marble.create(2, 1, texture)
     marble.mesh.position.set(0, 0, 0)
     marble.mesh.rotation.set(0, 0, 0)
     marble.mesh.scale.set(1, 1, 1)

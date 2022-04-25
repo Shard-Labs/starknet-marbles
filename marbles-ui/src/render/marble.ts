@@ -49,13 +49,13 @@ class Marble {
     }
 }
 
-async function getTexture() {
+async function getTexture(uri: string) {
     // load texture from url
-    return await new THREE.TextureLoader().loadAsync('/texture.jpg')
+    return await new THREE.TextureLoader().loadAsync(uri)
 }
 
-async function renderMarble() {
-    const texture = await getTexture()
+async function renderMarble(textureUri: string) {
+    const texture = await getTexture(textureUri)
     const marble = Marble.create(1, 32, 32, 1, texture)
     marble.mesh.position.set(0, 0, 0)
     marble.mesh.rotation.set(0, 0, 0)
@@ -64,10 +64,10 @@ async function renderMarble() {
     return marble.mesh
 }
 
-async function createScene() {
+async function createScene(textureUri: string) {
     const scene = new THREE.Scene()
 
-    scene.add(await renderMarble())
+    scene.add(await renderMarble(textureUri))
 
     return scene
 }
@@ -93,10 +93,6 @@ async function createRenderer(canvas: HTMLCanvasElement) {
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setClearColor(0xffffff, 1)
 
-    // add scene
-    const scene = await createScene()
-    renderer.render(scene, createCamera())
-
     return renderer
 }
 
@@ -107,10 +103,19 @@ export class View {
         private camera: THREE.Camera
     ) {}
 
-    static async create(canvas: HTMLCanvasElement): Promise<View> {
+    static async create(
+        canvas: HTMLCanvasElement,
+        textureUri: string
+    ): Promise<View> {
+        const renderer = await createRenderer(canvas)
+        const scene = await createScene(textureUri)
+        const camera = createCamera()
+
+        renderer.render(scene, camera)
+
         return new View(
             await createRenderer(canvas),
-            await createScene(),
+            await createScene(textureUri),
             createCamera()
         )
     }

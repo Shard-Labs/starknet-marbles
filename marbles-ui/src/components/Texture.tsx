@@ -6,22 +6,40 @@ const Sketch = dynamic(() => import('react-p5'), { ssr: false })
 let x = 50
 let y = 50
 
-export const Texture = () => {
+interface TextureProps {
+    onTextureRender: (canvas: HTMLCanvasElement) => void
+}
+
+export const Texture: React.FC<TextureProps> = ({ onTextureRender }) => {
     const [canRender, setCanRender] = React.useState(false)
+    const [canvasEl, setCanvasEl] = React.useState<HTMLCanvasElement | null>(
+        null
+    )
 
     React.useEffect(() => {
         setCanRender(true)
     }, [setCanRender])
 
-    const setup = React.useCallback((p5, parent) => {
-        p5.createCanvas(500, 500).parent(parent)
-    }, [])
+    const setup = React.useCallback(
+        (p5, parent) => {
+            const { canvas } = p5.createCanvas(500, 500).parent(parent)
+            setCanvasEl(canvas)
+        },
+        [setCanvasEl]
+    )
 
-    const draw = React.useCallback((p5) => {
-        p5.background(100)
-        console.log('once please')
-        p5.noLoop()
-    }, [])
+    const draw = React.useCallback(
+        (p5) => {
+            p5.background('red')
+
+            if (canvasEl != null) {
+                onTextureRender(canvasEl)
+            }
+
+            p5.noLoop()
+        },
+        [canvasEl, onTextureRender]
+    )
 
     return canRender ? <Sketch setup={setup} draw={draw} /> : null
 }

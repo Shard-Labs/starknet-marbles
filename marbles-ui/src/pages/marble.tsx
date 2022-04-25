@@ -3,6 +3,7 @@ import type { NextPage } from 'next'
 import { View } from '~/render/marble'
 import { Texture } from '~/components/Texture'
 import { useRouter } from 'next/router'
+import { useUpload } from '~/providers/FirebaseProvider'
 
 const Marble: NextPage = () => {
     const router = useRouter()
@@ -10,8 +11,12 @@ const Marble: NextPage = () => {
         return parseInt(router.query.id as string)
     }, [router])
 
+    const upload = useUpload()
+
     const [textureUri, setTextureUri] = React.useState<string | null>(null)
     const [marbleCanvas, setMarbleCanvas] =
+        React.useState<HTMLCanvasElement | null>(null)
+    const [textureCanvas, setTextureCanvas] =
         React.useState<HTMLCanvasElement | null>(null)
     const viewCanvasRef = React.useCallback(
         async (canvas: HTMLCanvasElement) => {
@@ -25,6 +30,7 @@ const Marble: NextPage = () => {
     const handleTextureRender = React.useCallback(
         (canvas: HTMLCanvasElement) => {
             setTextureUri(canvas.toDataURL('image/png'))
+            setTextureCanvas(canvas)
         },
         [setTextureUri]
     )
@@ -55,6 +61,19 @@ const Marble: NextPage = () => {
         link.click()
     }, [textureUri])
 
+    const handleUpload = React.useCallback(() => {
+        if (!textureUri) {
+            return
+        }
+
+        textureCanvas?.toBlob((blob) => {
+            if (blob) {
+                console.log(blob)
+                upload(`marble-${hashNumber}.png`, blob)
+            }
+        }, 'image/png')
+    }, [upload, textureCanvas])
+
     return (
         <div>
             <button
@@ -71,6 +90,21 @@ const Marble: NextPage = () => {
                 onClick={handleDownload}
             >
                 download
+            </button>
+            <button
+                style={{
+                    padding: '.5rem',
+                    fontSize: '1.5rem',
+                    fontFamily: 'monospace',
+                    appearance: 'none',
+                    background: 'black',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                }}
+                onClick={handleUpload}
+            >
+                upload
             </button>
             <Texture
                 key={hashNumber}

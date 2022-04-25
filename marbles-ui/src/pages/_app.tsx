@@ -3,16 +3,16 @@ import NextHead from 'next/head'
 import { InjectedConnector, StarknetProvider } from '@starknet-react/core'
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const connectors = [new InjectedConnector()]
+    const connectors = [new InjectedConnector()]
 
-  return (
-    <StarknetProvider autoConnect connectors={connectors}>
-      <NextHead>
-        <title>StarkNet ❤️ React</title>
-      </NextHead>
-      <Component {...pageProps} />
-    </StarknetProvider>
-  )
+    return (
+        <>
+            <NextHead>
+                <title>StarkNet ❤️ React</title>
+            </NextHead>
+            <Component {...pageProps} />
+        </>
+    )
 }
 
 export default MyApp

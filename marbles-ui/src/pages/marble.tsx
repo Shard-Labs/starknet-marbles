@@ -1,9 +1,19 @@
+import React from 'react'
 import type { NextPage } from 'next'
+import { View } from '../render/marble'
 
 const Marble: NextPage = () => {
+    const viewRef = React.useCallback(async (canvas: HTMLCanvasElement) => {
+        if (canvas != null) {
+            const view = await View.create(canvas)
+            console.log(view)
+            await view.render()
+        }
+    }, [])
+
     return (
         <div>
-            <h1>Marble render</h1>
+            <canvas ref={viewRef}></canvas>
         </div>
     )
 }

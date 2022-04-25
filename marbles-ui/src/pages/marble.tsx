@@ -49,12 +49,36 @@ const Marble: NextPage = () => {
         })
     }, [marbleCanvas, textureUri])
 
-    const base64 = useMemo(() => {
-        return textureUri?.split(';base64,')[1]
+    const handleDownload = React.useCallback(() => {
+        if (!textureUri) {
+            return
+        }
+
+        const link = document.createElement('a')
+
+        link.setAttribute('href', textureUri)
+        link.setAttribute('download', `marble-${hashNumber}.png`)
+
+        link.click()
     }, [textureUri])
 
     return (
         <div>
+            <button
+                style={{
+                    padding: '.5rem',
+                    fontSize: '1.5rem',
+                    fontFamily: 'monospace',
+                    appearance: 'none',
+                    background: 'black',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                }}
+                onClick={handleDownload}
+            >
+                download
+            </button>
             <Texture
                 key={hashNumber}
                 hashNumber={hashNumber}

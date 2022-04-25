@@ -16,8 +16,6 @@ class Marble {
         this._material = new THREE.MeshBasicMaterial({
             transparent: true,
             opacity: this._opacity,
-            // roughness: 0.1,
-            // transmission: 1,
             map: this._texture,
         })
 
@@ -44,13 +42,9 @@ class Marble {
 }
 
 async function getTexture(uri: string) {
-    // load texture from url
     const texture = await new THREE.TextureLoader().loadAsync(uri)
 
     texture.mapping = THREE.EquirectangularReflectionMapping
-    // texture.wrapS = THREE.MirroredRepeatWrapping
-    // texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.encoding = THREE.sRGBEncoding
 
     return texture
 }
@@ -69,6 +63,10 @@ async function createScene(textureUri: string) {
     const scene = new THREE.Scene()
 
     scene.add(await renderMarble(textureUri))
+
+    const black = new THREE.Color(0x000000)
+
+    scene.background = black
 
     return scene
 }
@@ -106,6 +104,10 @@ export class View {
         private camera: THREE.Camera
     ) {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+        this.controls.enableZoom = false
+        this.controls.autoRotate = true
+        this.controls.rotateSpeed = 60
+        this.controls.enableRotate = false
     }
 
     static async create(
@@ -125,13 +127,13 @@ export class View {
         )
     }
 
-    public async render() {
+    public render() {
         this.renderer.render(this.scene, this.camera)
     }
 
     public animate() {
-        // requestAnimationFrame(this.animate)
-        this.controls.update()
+        requestAnimationFrame(this.animate.bind(this))
         this.render()
+        this.controls.update()
     }
 }

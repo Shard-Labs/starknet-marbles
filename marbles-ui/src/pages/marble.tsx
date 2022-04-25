@@ -6,7 +6,6 @@ import { useRouter } from 'next/router'
 
 const Marble: NextPage = () => {
     const router = useRouter()
-    console.log(router.query)
     const hashNumber = useMemo(() => {
         return parseInt(router.query.id as string)
     }, [router])
@@ -35,18 +34,12 @@ const Marble: NextPage = () => {
 
         const createView = async (canvas: HTMLCanvasElement, uri: string) => {
             view = await View.create(canvas, uri)
-            await view.render()
+            await view.animate()
         }
 
         if (marbleCanvas && textureUri) {
             createView(marbleCanvas, textureUri)
         }
-
-        window.addEventListener('mousemove', () => {
-            if (view) {
-                view.animate()
-            }
-        })
     }, [marbleCanvas, textureUri])
 
     const handleDownload = React.useCallback(() => {

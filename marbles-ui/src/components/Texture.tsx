@@ -80,7 +80,7 @@ export const Texture: React.FC<TextureProps> = ({
             p5.noStroke()
             // p5.blendMode(p5.LIGHTEST)
 
-            const rez = 0.005
+            const rez = 0.015
             const t = hashNumber
 
             const colorA = p5.color(rarityData[rarity].defaultColor)
@@ -88,7 +88,7 @@ export const Texture: React.FC<TextureProps> = ({
 
             p5.translate(p5.width / 2, p5.height / 2)
 
-            for (let i = p5.width * 2; i > 0; i -= 1) {
+            for (let i = p5.width * 2 + 50; i > 0; i -= 1) {
                 var n1 = p5.noise(i * rez, i * rez, t)
                 var n2 = p5.noise(i * rez - t, i * rez, t)
                 var n3 = p5.noise(i * rez + t, i * rez, t)

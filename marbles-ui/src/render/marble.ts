@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 class Marble {
     private _geometry: THREE.BufferGeometry
@@ -47,6 +48,9 @@ async function getTexture(uri: string) {
     const texture = await new THREE.TextureLoader().loadAsync(uri)
 
     texture.mapping = THREE.EquirectangularReflectionMapping
+    // texture.wrapS = THREE.MirroredRepeatWrapping
+    // texture.wrapT = THREE.MirroredRepeatWrapping
+    texture.encoding = THREE.sRGBEncoding
 
     return texture
 }
@@ -94,11 +98,15 @@ async function createRenderer(canvas: HTMLCanvasElement) {
 }
 
 export class View {
+    private controls: OrbitControls
+
     private constructor(
         private renderer: THREE.WebGLRenderer,
         private scene: THREE.Scene,
         private camera: THREE.Camera
-    ) {}
+    ) {
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    }
 
     static async create(
         canvas: HTMLCanvasElement,
@@ -119,5 +127,11 @@ export class View {
 
     public async render() {
         this.renderer.render(this.scene, this.camera)
+    }
+
+    public animate() {
+        // requestAnimationFrame(this.animate)
+        this.controls.update()
+        this.render()
     }
 }

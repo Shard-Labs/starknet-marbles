@@ -1,14 +1,20 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import type { NextPage } from 'next'
 import { View } from '~/render/marble'
 import { Texture } from '~/components/Texture'
+import { useRouter } from 'next/router'
 
 const Marble: NextPage = () => {
-    const hashNumber = 5
+    const router = useRouter()
+    console.log(router.query)
+    const hashNumber = useMemo(() => {
+        return parseInt(router.query.id as string)
+    }, [router])
+
     const [textureUri, setTextureUri] = React.useState<string | null>(null)
     const [marbleCanvas, setMarbleCanvas] =
         React.useState<HTMLCanvasElement | null>(null)
-    const viewRef = React.useCallback(
+    const viewCanvasRef = React.useCallback(
         async (canvas: HTMLCanvasElement) => {
             if (canvas != null) {
                 setMarbleCanvas(canvas)
@@ -25,16 +31,27 @@ const Marble: NextPage = () => {
     )
 
     React.useEffect(() => {
+        let view: View
+
         const createView = async (canvas: HTMLCanvasElement, uri: string) => {
-            const view = await View.create(canvas, uri)
-            console.log(view)
+            view = await View.create(canvas, uri)
             await view.render()
         }
 
         if (marbleCanvas && textureUri) {
             createView(marbleCanvas, textureUri)
         }
+
+        window.addEventListener('mousemove', () => {
+            if (view) {
+                view.animate()
+            }
+        })
     }, [marbleCanvas, textureUri])
+
+    const base64 = useMemo(() => {
+        return textureUri?.split(';base64,')[1]
+    }, [textureUri])
 
     return (
         <div>
@@ -43,7 +60,7 @@ const Marble: NextPage = () => {
                 hashNumber={hashNumber}
                 onTextureRender={handleTextureRender}
             />
-            <canvas key={hashNumber} ref={viewRef} />
+            <canvas ref={viewCanvasRef} />
         </div>
     )
 }

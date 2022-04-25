@@ -3,9 +3,6 @@ import React from 'react'
 
 const Sketch = dynamic(() => import('react-p5'), { ssr: false })
 
-let x = 50
-let y = 50
-
 interface TextureProps {
     onTextureRender: (canvas: HTMLCanvasElement) => void
     hashNumber: number
@@ -20,20 +17,24 @@ enum Rarity {
 interface RarityDatum {
     width: number
     colors: Array<number>
+    defaultColor: string
 }
 
 const rarityData: Record<Rarity, RarityDatum> = {
     [Rarity.BASIC]: {
-        width: 500,
-        colors: [255, 10, 0],
+        width: 300,
+        colors: [255, 255, 255],
+        defaultColor: 'white',
     },
     [Rarity.RARE]: {
-        width: 750,
-        colors: [255, 125, 0],
+        width: 400,
+        colors: [255, 255, 0],
+        defaultColor: 'azure',
     },
     [Rarity.EPIC]: {
-        width: 1000,
-        colors: [255, 255, 255],
+        width: 500,
+        colors: [255, 125, 0],
+        defaultColor: 'gold',
     },
 }
 
@@ -65,7 +66,7 @@ export const Texture: React.FC<TextureProps> = ({
     const setup = React.useCallback(
         (p5, parent) => {
             const width = rarityData[rarity].width
-            const { canvas } = p5.createCanvas(width, width).parent(parent)
+            const { canvas } = p5.createCanvas(width, width / 2).parent(parent)
             setCanvasEl(canvas)
         },
         [setCanvasEl, rarity]
@@ -77,32 +78,34 @@ export const Texture: React.FC<TextureProps> = ({
             p5.noiseSeed(hashNumber)
             p5.randomSeed(hashNumber)
             p5.noStroke()
+            // p5.blendMode(p5.LIGHTEST)
 
             const rez = 0.005
             const t = hashNumber
 
-            const colorA = p5.color('white')
+            const colorA = p5.color(rarityData[rarity].defaultColor)
             const colorB = p5.color(...p5.shuffle(rarityData[rarity].colors))
 
-            for (let i = 0; i < p5.height; i += 2) {
-                for (let j = 0; j < p5.width; j += 2) {
-                    var n1 = p5.noise(i * rez, j * rez, t)
-                    var n2 = p5.noise(i * rez - t, j * rez, t)
-                    var n3 = p5.noise(i * rez + t, j * rez, t)
+            p5.translate(p5.width / 2, p5.height / 2)
 
-                    const c = p5.lerpColor(
-                        colorA,
-                        p5.color(
-                            colorB.levels[0] * n1,
-                            colorB.levels[1] * n2,
-                            colorB.levels[2] * n3
-                        ),
-                        p5.map(n1, -1, 1, 0, 1)
-                    )
+            for (let i = p5.width * 2; i > 0; i -= 1) {
+                var n1 = p5.noise(i * rez, i * rez, t)
+                var n2 = p5.noise(i * rez - t, i * rez, t)
+                var n3 = p5.noise(i * rez + t, i * rez, t)
 
-                    p5.fill(c)
-                    p5.rect(i, j, 2)
-                }
+                const c = p5.lerpColor(
+                    p5.color(
+                        colorA.levels[0] * n1,
+                        colorB.levels[1] * n2,
+                        colorB.levels[2] * n3
+                    ),
+                    colorA,
+                    p5.map(i, p5.width, 0, 0, 1)
+                )
+
+                p5.fill(c)
+
+                p5.circle(0, 0, i)
             }
 
             if (canvasEl != null) {

@@ -13,8 +13,8 @@ export const Texture = () => {
         setCanRender(true)
     }, [setCanRender])
 
-    const setup = React.useCallback((p5, canvasParentRef) => {
-        p5.createCanvas(500, 500)
+    const setup = React.useCallback((p5, parent) => {
+        p5.createCanvas(500, 500).parent(parent)
     }, [])
 
     const draw = React.useCallback((p5) => {

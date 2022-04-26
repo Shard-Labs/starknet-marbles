@@ -2,14 +2,14 @@ import type { NextPage } from 'next'
 
 import THREE from 'three';
 import React from 'react';
-import { View } from '~/render/terrain';
-import { Texture } from '~/components/Texture'
+import { View } from '~/render/game';
 
 const Game: NextPage = () => {
     const viewRef = React.useCallback(async (canvas: HTMLCanvasElement) => {
         if (canvas != null) {
             const view = await View.create(canvas);
-            await view.render()
+            await view.addTerrain();
+            await view.render();
         }
     }, [])
     // @ts-ignore

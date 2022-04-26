@@ -3,15 +3,26 @@ import type { NextPage } from 'next'
 import { View } from '~/render/marble'
 import { Texture } from '~/components/Texture'
 import { useRouter } from 'next/router'
-import { useUpload } from '~/providers/FirebaseProvider'
+import { useImage } from '~/providers/FirebaseProvider'
+
+const btnStyles = {
+    padding: '.5rem',
+    fontSize: '1.5rem',
+    fontFamily: 'monospace',
+    appearance: 'none',
+    background: 'black',
+    color: 'white',
+    border: 'none',
+    cursor: 'pointer',
+} as any
 
 const Marble: NextPage = () => {
     const router = useRouter()
-    const hashNumber = useMemo(() => {
+    const imageId = useMemo(() => {
         return parseInt(router.query.id as string)
     }, [router])
 
-    const upload = useUpload()
+    const { upload, download, uploaded } = useImage(imageId)
 
     const [textureUri, setTextureUri] = React.useState<string | null>(null)
     const [marbleCanvas, setMarbleCanvas] =
@@ -40,26 +51,13 @@ const Marble: NextPage = () => {
 
         const createView = async (canvas: HTMLCanvasElement, uri: string) => {
             view = await View.create(canvas, uri)
-            await view.animate()
+            view.animate()
         }
 
         if (marbleCanvas && textureUri) {
             createView(marbleCanvas, textureUri)
         }
     }, [marbleCanvas, textureUri])
-
-    const handleDownload = React.useCallback(() => {
-        if (!textureUri) {
-            return
-        }
-
-        const link = document.createElement('a')
-
-        link.setAttribute('href', textureUri)
-        link.setAttribute('download', `marble-${hashNumber}.png`)
-
-        link.click()
-    }, [textureUri])
 
     const handleUpload = React.useCallback(() => {
         if (!textureUri) {
@@ -69,49 +67,42 @@ const Marble: NextPage = () => {
         textureCanvas?.toBlob((blob) => {
             if (blob) {
                 console.log(blob)
-                upload(`marble-${hashNumber}.png`, blob)
+                upload(blob)?.catch((err) => alert(err))
             }
         }, 'image/png')
     }, [upload, textureCanvas])
 
+    const handleDownload = React.useCallback(() => {
+        download()
+            ?.then((uri) => {
+                console.log(uri)
+            })
+            .catch((err) => alert(err))
+    }, [download])
+
     return (
-        <div>
-            <button
-                style={{
-                    padding: '.5rem',
-                    fontSize: '1.5rem',
-                    fontFamily: 'monospace',
-                    appearance: 'none',
-                    background: 'black',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                }}
-                onClick={handleDownload}
-            >
-                download
-            </button>
-            <button
-                style={{
-                    padding: '.5rem',
-                    fontSize: '1.5rem',
-                    fontFamily: 'monospace',
-                    appearance: 'none',
-                    background: 'black',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                }}
-                onClick={handleUpload}
-            >
-                upload
-            </button>
+        <div style={{ backgroundColor: 'black' }}>
+            {uploaded !== undefined && (
+                <>
+                    {!uploaded && (
+                        <button style={btnStyles} onClick={handleUpload}>
+                            upload
+                        </button>
+                    )}
+                    {uploaded && (
+                        <button style={btnStyles} onClick={handleDownload}>
+                            download
+                        </button>
+                    )}
+                </>
+            )}
+
             <Texture
-                key={hashNumber}
-                hashNumber={hashNumber}
+                key={imageId}
+                hashNumber={imageId}
                 onTextureRender={handleTextureRender}
             />
-            <canvas ref={viewCanvasRef} />
+            <canvas style={{ overflow: 'hidden' }} ref={viewCanvasRef} />
         </div>
     )
 }

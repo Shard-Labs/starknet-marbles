@@ -1,0 +1,8 @@
+node_modules
+.env
+.env.test
+starknet-artifacts
+.DS_Store
+Yarn-error.log
+cache
+package-lock.json
